@@ -2,7 +2,6 @@
 
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { type VariantProps, cva } from "class-variance-authority";
-import { X } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "~/lib/client/utils";
@@ -80,14 +79,6 @@ const SheetHeader = ({
     {...props}
   >
     {props.children}
-    <SheetClose asChild>
-      <Button
-        variant="ghost"
-        className="h-10 aspect-square p-2 my-auto"
-      >
-        <X />
-      </Button>
-    </SheetClose>
   </div>
 );
 SheetHeader.displayName = "SheetHeader";

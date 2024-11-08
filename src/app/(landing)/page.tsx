@@ -26,9 +26,9 @@ export default function LandingClientPage() {
 
 function Hero() {
   return (
-    <section className="container min-h-screen py-20 flex flex-col justify-center items-center gap-16">
+    <section className="container min-h-screen mt-16 py-20 flex flex-col justify-center items-center gap-16">
       <div className="space-y-6 w-fit text-center">
-        <h1 className="font-extrabold text-4xl lg:text-5xl max-w-[24ch] mx-auto">
+        <h1 className="font-extrabold text-4xl md:text-5xl max-w-[24ch] mx-auto">
           Покупки видны – финансы под контролем.
         </h1>
         <Button className="w-full lg:w-fit">Начать сейчас</Button>
@@ -38,38 +38,41 @@ function Hero() {
           ваши покупки по категориям.
         </p>
       </div>
-      <HeroDashboard />
+      <HeroDashboard className="max-w-full" />
     </section>
   );
 }
 
 function Advantages() {
   return (
-    <section className="flex flex-col py-20 gap-16 container items-center justify-center">
-      <h2 className="text-2xl lg:text-5xl max-w-[20ch] text-center mx-auto font-extrabold">
+    <section
+      className="flex flex-col py-20 gap-16 container items-center justify-center"
+      id="advantages"
+    >
+      <h2 className="text-2xl md:text-4xl lg:text-5xl max-w-[20ch] text-center mx-auto font-extrabold">
         <span className="text-primary">Преимущества</span> нашей платформы
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AdvantagesImage className="max-w-full h-fit" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AdvantagesCard className="lg:col-span-2 space-y-8 h-fit">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AdvantagesCard className="md:col-span-2 space-y-8 h-fit">
             <h4 className="text-2xl font-bold">Твои возможности с нами</h4>
-            <div className="grid lg:grid-cols-10 gap-4 lg:gap-2">
-              <div className="lg:pl-2 space-y-3 lg:space-y-9 lg:border-l lg:col-span-5">
+            <div className="grid md:grid-cols-10 gap-4 md:gap-2">
+              <div className="md:pl-2 space-y-3 md:space-y-9 md:border-l md:col-span-5">
                 <div className="space-y-2">
                   <p className="text-muted-foreground">Полный учет расходов</p>
                   <p className="text-2xl font-medium">61%</p>
                 </div>
                 <div className="w-full h-8 bg-primary rounded-md"></div>
               </div>
-              <div className="lg:pl-2 space-y-3 lg:space-y-9 lg:border-l lg:col-span-2">
+              <div className="md:pl-2 space-y-3 md:space-y-9 md:border-l md:col-span-2">
                 <div className="space-y-2">
                   <p className="text-muted-foreground">Экономия</p>
                   <p className="text-2xl font-medium">17%</p>
                 </div>
                 <div className="w-full h-8 bg-primary/30 rounded-md"></div>
               </div>
-              <div className="lg:pl-2 space-y-3 lg:space-y-9 lg:border-l lg:col-span-3">
+              <div className="md:pl-2 space-y-3 md:space-y-9 md:border-l md:col-span-3">
                 <div className="space-y-2">
                   <p className="text-muted-foreground">Снижение</p>
                   <p className="text-2xl font-medium">22%</p>
@@ -78,7 +81,7 @@ function Advantages() {
               </div>
             </div>
           </AdvantagesCard>
-          <AdvantagesCard className="hidden lg:block">
+          <AdvantagesCard className="hidden md:block">
             <Hourglass className="text-primary" />
             <div className="space-y-2">
               <h4 className="text-2xl font-bold">Экономия времени</h4>
@@ -88,7 +91,7 @@ function Advantages() {
               </p>
             </div>
           </AdvantagesCard>
-          <AdvantagesCard className="hidden lg:block">
+          <AdvantagesCard className="hidden md:block">
             <HeartHandshake className="text-primary" />
             <div className="space-y-2">
               <h4 className="text-2xl font-bold">Мгновенная помощь</h4>
@@ -137,7 +140,10 @@ const faqQuestions: FAQQuestion[] = [
 
 function FAQ() {
   return (
-    <section className="flex flex-col py-20 gap-16 container items-center justify-center">
+    <section
+      className="flex flex-col py-20 gap-16 container items-center justify-center"
+      id="faq"
+    >
       <div className="relative flex md:w-fit w-full">
         <svg
           className="absolute lg:right-full top-6 left-0 h-16 lg:h-auto"
@@ -165,7 +171,7 @@ function FAQ() {
           </defs>
         </svg>
 
-        <h2 className="text-2xl lg:text-5xl max-w-[20ch] text-center mx-auto font-extrabold">
+        <h2 className="text-2xl md:text-4xl lg:text-5xl max-w-[20ch] text-center mx-auto font-extrabold">
           Часто задаваемые вопросы
         </h2>
       </div>
@@ -183,10 +189,13 @@ function FAQ() {
 
 function Feedback() {
   return (
-    <section className="flex flex-col py-20 gap-16 container items-center justify-center">
-      <div className="rounded-3xl w-full px-4 py-6 lg:p-12 bg-primary text-primary-foreground grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+    <section
+      className="flex flex-col py-20 gap-16 container items-center justify-center"
+      id="feedback"
+    >
+      <div className="rounded-3xl w-full px-4 py-6 lg:p-12 bg-primary text-primary-foreground grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
         <div className="space-y-6 flex flex-col justify-center">
-          <h2 className="text-2xl lg:text-5xl max-w-[20ch] font-extrabold">
+          <h2 className="text-2xl md:text-3xl lg:text-5xl max-w-[20ch] font-extrabold">
             Остались вопросы?
             <br />
             Напишите нам!
@@ -198,7 +207,7 @@ function Feedback() {
           </p>
           <FeedbackForm />
         </div>
-        <FeedbackImage className="max-w-full h-fit" />
+        <FeedbackImage className="max-w-full mx-auto my-auto h-fit" />
       </div>
     </section>
   );

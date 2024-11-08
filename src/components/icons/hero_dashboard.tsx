@@ -8,7 +8,7 @@ export default function HeroDashboard({
   return (
     <>
       <svg
-        className={cn("hidden lg:block", className)}
+        className={cn("hidden md:block", className)}
         width="964"
         height="672"
         viewBox="0 0 964 672"
@@ -1308,7 +1308,7 @@ export default function HeroDashboard({
         </defs>
       </svg>
       <svg
-        className={cn("block lg:hidden", className)}
+        className={cn("block md:hidden", className)}
         width="262"
         height="461"
         viewBox="0 0 262 461"
