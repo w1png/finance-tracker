@@ -3,8 +3,8 @@ import { Receipt } from "~/lib/shared/types/receipt";
 import { db } from "~/server/db";
 import { expenses, expenseTypeEnum, receipts } from "~/server/db/schema";
 
-const createdById = "e13e1abd-5afb-41d3-bb0c-bc89323e2162";
-const fileId = "31f8bb99-b701-427b-a182-56d25a375967";
+const createdById = "f5d74fd2-cc12-40b7-a80b-e5a15160d028";
+const fileId = "c224f49e-b606-4b29-823a-aa2761851ac4";
 
 function randomInRange(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);

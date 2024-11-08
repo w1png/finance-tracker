@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { format, setMonth } from "date-fns";
 import {
   ChartContainer,
@@ -15,6 +15,12 @@ function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function FormatMonth(index: number) {
+  return capitalize(
+    format(setMonth(new Date(), index), "LLLL", { locale: ru }),
+  );
+}
+
 export default function YearlyChart() {
   const { data: yearlyExpenses, isLoading } = api.stat.getYearly.useQuery();
 
@@ -27,7 +33,7 @@ export default function YearlyChart() {
 
   return (
     <ChartContainer
-      className="min-h-96 w-full"
+      className="min-h-96 w-full h-fit"
       config={{
         past: {
           label: "Предыдущий год",
@@ -39,11 +45,9 @@ export default function YearlyChart() {
     >
       <BarChart
         data={yearlyExpenses.months.map((m, i) => ({
-          month: capitalize(
-            format(setMonth(new Date(), i), "LLLL", { locale: ru }),
-          ),
-          past: m.past / 100,
-          current: m.current / 100,
+          month: FormatMonth(i),
+          past: m.past?.sumTotal ?? 0,
+          current: m.current?.sumTotal ?? 0,
         }))}
         accessibilityLayer
       >
@@ -62,6 +66,12 @@ export default function YearlyChart() {
           tickMargin={10}
           axisLine={false}
           tickFormatter={(value) => value.slice(0, 3)}
+        />
+        <YAxis
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+          tickFormatter={(value) => `${value.toFixed(2)} ₽`}
         />
         <Bar
           dataKey="current"
