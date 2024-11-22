@@ -1,16 +1,16 @@
 import { redirect } from "next/navigation";
-import type React from "react";
+import { ReactNode } from "react";
 import { getServerAuthSession } from "~/server/auth";
 
-export default async function AdminLayout({
+export default async function SignInLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const session = await getServerAuthSession();
 
-  if (session?.user.role !== "ADMIN") {
-    redirect("/auth/signin");
+  if (session) {
+    redirect("/dashboard");
   }
 
   return children;

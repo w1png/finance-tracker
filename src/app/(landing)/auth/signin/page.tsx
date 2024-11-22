@@ -1,5 +1,9 @@
 "use client";
 
+import GoogleLogo from "../../../../../public/google.svg";
+import YandexLogo from "../../../../../public/yandex.svg";
+import GithubLogo from "../../../../../public/github.svg";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -10,6 +14,8 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { OnError } from "~/lib/client/on_error";
+import Image from "next/image";
+import { Separator } from "~/components/ui/separator";
 
 export default function SignInPage() {
   const loginSchema = z.object({
@@ -52,7 +58,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="h-screen container flex items-center justify-center">
+    <div className="h-screen container flex items-center justify-center bg-background">
       <div className="rounded-xl shadow-xl border-2 border-input p-6 space-y-6 flex flex-col">
         <h1 className="text-2xl font-medium">Вход</h1>
         <Form {...form}>
@@ -68,40 +74,50 @@ export default function SignInPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      placeholder="Email"
-                      {...field}
-                    />
+                    <Input placeholder="Email" {...field} />
                   </FormControl>
                 </FormItem>
               )}
             />
-            <Button
-              type="submit"
-              className="w-full"
-            >
-              Войти
+            <Button type="submit" className="w-full">
+              Войти через Email
             </Button>
           </form>
         </Form>
+
+        <div className="grid grid-cols-3 gap-2 items-center justify-center">
+          <Separator />
+          <p className="mx-auto my-auto text-center text-muted-foreground">
+            Или
+          </p>
+          <Separator />
+        </div>
+
         <div className="space-y-2 flex flex-col">
           <Button
-            className="min-w-[300px]"
+            variant="outline"
+            className="min-w-[300px] gap-2"
             onClick={() => OnSubmit({ provider: "google", data: undefined })}
           >
-            Войти через Google
+            <Image src={GoogleLogo} alt="google" className="size-6" />
+            <span>Войти через Google</span>
           </Button>
           <Button
-            className="min-w-[300px]"
+            variant="outline"
+            className="min-w-[300px] gap-2"
             onClick={() => OnSubmit({ provider: "github", data: undefined })}
           >
-            Войти через Github
+            <Image src={GithubLogo} alt="github" className="size-6" />
+
+            <span>Войти через Github</span>
           </Button>
           <Button
-            className="min-w-[300px]"
+            variant="outline"
+            className="min-w-[300px] gap-2"
             onClick={() => OnSubmit({ provider: "yandex", data: undefined })}
           >
-            Войти через Yandex
+            <Image src={YandexLogo} alt="yandex" className="size-6" />
+            <span>Войти через Yandex</span>
           </Button>
         </div>
       </div>

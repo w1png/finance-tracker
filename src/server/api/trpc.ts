@@ -7,6 +7,7 @@ import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
 import { s3 } from "../s3";
 import { ai } from "../openai";
+import { redis } from "../redis";
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await getServerAuthSession();
@@ -14,6 +15,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   return {
     db,
     ai,
+    redis,
     s3,
     session,
     ...opts,

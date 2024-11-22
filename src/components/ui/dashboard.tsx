@@ -6,13 +6,7 @@ export interface DashboardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Dashboard({ children, className, ...props }: DashboardProps) {
   return (
-    <div
-      {...props}
-      className={cn(
-        className,
-        "bg-secondary rounded-3xl shadow-xl grow overflow-hidden p-6 flex flex-col gap-4",
-      )}
-    >
+    <div {...props} className={cn("grow flex flex-col gap-6", className)}>
       {children}
     </div>
   );
@@ -26,14 +20,17 @@ export function DashboardContent({
   return (
     <div
       {...props}
-      className={cn(className, "grow overflow-y-scroll overflow-x-hidden")}
+      className={cn(
+        "rounded-3xl border border-border grow p-6 flex flex-col gap-4 bg-background",
+        className,
+      )}
     >
       {children}
     </div>
   );
 }
 
-export function DashboardFooter({
+export function DashboardHeader({
   children,
   className,
   ...props
@@ -41,8 +38,23 @@ export function DashboardFooter({
   return (
     <div
       {...props}
-      className={cn(className, "border-t w-full shrink-0 py-4 h-fit")}
+      className={cn(
+        "min-h-10 justify-between items-center flex flex-col lg:flex-row w-full gap-4",
+        className,
+      )}
     >
+      {children}
+    </div>
+  );
+}
+
+export function DashboardTitle({
+  children,
+  className,
+  ...props
+}: DashboardProps) {
+  return (
+    <div {...props} className={cn(className, "font-semibold text-2xl")}>
       {children}
     </div>
   );

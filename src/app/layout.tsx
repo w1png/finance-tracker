@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Manrope, Nunito } from "next/font/google";
 import TRPCReactProvider from "~/trpc/trpc_react_provider";
 import { Toaster } from "sonner";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const heading_font = Nunito({
   subsets: ["latin", "cyrillic"],
@@ -34,7 +35,7 @@ export default function RootLayout({
     >
       <body>
         <TRPCReactProvider>
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
           <Toaster richColors />
         </TRPCReactProvider>
       </body>

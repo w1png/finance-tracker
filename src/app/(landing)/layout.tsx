@@ -7,7 +7,7 @@ export default function LandingLayout({
   return (
     <>
       <Navbar />
-      <div>{children}</div>
+      <div className="bg-secondary">{children}</div>
       <Footer />
     </>
   );

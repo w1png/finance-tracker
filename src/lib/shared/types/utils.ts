@@ -8,3 +8,5 @@ export const IdSchema = z.object({
     })
     .min(1, "Необходимо указать идентификатор"),
 });
+
+export const OrderSchema = z.enum(["asc", "desc"]);

@@ -43,9 +43,6 @@ export const fileRouter = createTRPCRouter({
   get: publicProcedure.input(IdSchema).query(async ({ ctx, input }) => {
     const file = await ctx.db.query.files.findFirst({
       where: eq(files.id, input.id),
-      with: {
-        ticket: true,
-      },
     });
 
     if (!file) {

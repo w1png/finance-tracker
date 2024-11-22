@@ -36,7 +36,7 @@ export default function S3Image({
           )}
           <Image
             {...props}
-            src={`/api/files/${src}`}
+            src={`/api/file/${src}`}
             className={cn("object-cover size-full", imageClassName)}
             onLoadingComplete={() => {
               setIsLoading(false);

@@ -1,7 +1,9 @@
 import { HeartHandshake, Hourglass } from "lucide-react";
 import { ReactNode } from "react";
 import AdvantagesImage from "~/components/icons/advantages";
-import HeroDashboard from "~/components/icons/hero_dashboard";
+import HeroDashboard from "../../../public/hero_dashboard.svg";
+import Pig from "../../../public/pig.svg";
+import Coffee from "../../../public/coffee.svg";
 import {
   Accordion,
   AccordionContent,
@@ -12,6 +14,8 @@ import { cn } from "~/lib/client/utils";
 import FeedbackForm from "./feedback";
 import FeedbackImage from "~/components/icons/feedback";
 import { Button } from "~/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function LandingClientPage() {
   return (
@@ -26,19 +30,33 @@ export default function LandingClientPage() {
 
 function Hero() {
   return (
-    <section className="container min-h-screen mt-16 py-20 flex flex-col justify-center items-center gap-16">
+    <section className="container min-h-screen mt-16 py-20 flex flex-col justify-center items-center gap-16 relative">
       <div className="space-y-6 w-fit text-center">
         <h1 className="font-extrabold text-4xl md:text-5xl max-w-[24ch] mx-auto">
           Покупки видны – финансы под контролем.
         </h1>
-        <Button className="w-full lg:w-fit">Начать сейчас</Button>
+        <div>
+          <Link className="w-full lg:w-fit" href="/auth/signin">
+            <Button className="w-full lg:w-fit">Начать сейчас</Button>
+          </Link>
+        </div>
         <p className="text-muted-foreground max-w-[75ch] mx-auto">
           Наша платформа использует искусственный интеллект для автоматического
           считывания данных с чеков, помогая легко отслеживать и организовывать
           ваши покупки по категориям.
         </p>
       </div>
-      <HeroDashboard className="max-w-full" />
+      <Image src={HeroDashboard} className="max-w-full" alt="hero_dashboard" />
+      <Image
+        src={Pig}
+        className="hidden left-0 top-32 lg:absolute"
+        alt="hero_dashboard"
+      />
+      <Image
+        src={Coffee}
+        className="hidden right-0 top-16 lg:absolute"
+        alt="hero_dashboard"
+      />
     </section>
   );
 }
@@ -177,7 +195,11 @@ function FAQ() {
       </div>
       <Accordion type="single" className="w-full space-y-4">
         {faqQuestions.map((question) => (
-          <AccordionItem key={question.question} value={question.question}>
+          <AccordionItem
+            className="bg-background"
+            key={question.question}
+            value={question.question}
+          >
             <AccordionTrigger>{question.question}</AccordionTrigger>
             <AccordionContent>{question.answer}</AccordionContent>
           </AccordionItem>
@@ -221,7 +243,12 @@ function AdvantagesCard({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-2xl space-y-4 p-6 border", className)}>
+    <div
+      className={cn(
+        "bg-background rounded-2xl space-y-4 p-6 border",
+        className,
+      )}
+    >
       {children}
     </div>
   );

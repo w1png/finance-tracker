@@ -1,16 +1,36 @@
 import { z } from "zod";
 import { FileSchema } from "~/lib/shared/types/file";
 import { zodResponseFormat } from "openai/helpers/zod";
+import crypto from "crypto";
 import { authenticatedProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { ReceiptSchema } from "~/lib/shared/types/receipt";
+import {
+  ExpenseSchema,
+  ReceiptOutputSchema,
+  ReceiptProductTypeSchema,
+  ReceiptSchema,
+} from "~/lib/shared/types/receipt";
 import { TRPCError } from "@trpc/server";
 import Sharp from "sharp";
 import { createCaller } from "..";
-import { warn } from "console";
 import { expenses, receipts } from "~/server/db/schema";
-import { and, eq, isNotNull, isNull, not } from "drizzle-orm";
-import { ReceiptIndianRupee } from "lucide-react";
-import { IdSchema } from "~/lib/shared/types/utils";
+import { and, asc, desc, eq, gte, isNull } from "drizzle-orm";
+import { IdSchema, OrderSchema } from "~/lib/shared/types/utils";
+import { subDays } from "date-fns";
+import { type redis as RedisClient } from "~/server/redis";
+
+async function InvalidateReceipt({
+  receiptId,
+  userId,
+  redis,
+}: {
+  receiptId: string;
+  userId: string;
+  redis: typeof RedisClient;
+}) {
+  await redis.del(`receipt:${receiptId}*`);
+  await redis.del(`yearly-stats:${userId}`);
+  await redis.del(`category-stats:${userId}`);
+}
 
 const system_prompt = `Ты анализируешь фотографии чеков пользователей и извлекаешь информацию о каждом товаре согласно заданной схеме:
 
@@ -38,6 +58,16 @@ export const receiptRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const resizedImage = await ResizeImage(input.image);
+
+      const imageHash = crypto
+        .createHash("sha256")
+        .update(resizedImage)
+        .digest("hex");
+
+      const cachedReceiptId = await ctx.redis.get(`img:${imageHash}`);
+      if (cachedReceiptId) {
+        return cachedReceiptId;
+      }
 
       const result = await ctx.ai.chat.completions.create({
         model: "gpt-4o-2024-08-06",
@@ -100,24 +130,58 @@ export const receiptRouter = createTRPCRouter({
         );
       });
 
-      return receiptId;
+      await InvalidateReceipt({
+        receiptId: receiptId!,
+        redis: ctx.redis,
+        userId: ctx.session.user.id,
+      });
+      await ctx.redis.set(`img:${imageHash}`, receiptId!);
+
+      return receiptId!;
     }),
-  getAll: authenticatedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.receipts.findMany({
-      where: and(
-        eq(receipts.createdById, ctx.session.user.id),
-        isNull(receipts.deletedAt),
-        eq(receipts.isSaved, true),
-      ),
-      with: {
-        expenses: true,
-      },
-    });
-  }),
+  getAll: authenticatedProcedure
+    .input(
+      z.object({
+        category: ReceiptProductTypeSchema.optional(),
+        lastDays: z.number().optional().default(30),
+        createdAtOrder: OrderSchema.nullable().default("desc"),
+        priceOrder: OrderSchema.nullable(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const rs = await ctx.db.query.receipts.findMany({
+        where: and(
+          eq(receipts.createdById, ctx.session.user.id),
+          isNull(receipts.deletedAt),
+          eq(receipts.isSaved, true),
+
+          gte(receipts.createdAt, subDays(new Date(), input.lastDays)),
+        ),
+        orderBy: and(
+          input.createdAtOrder === "asc"
+            ? asc(receipts.createdAt)
+            : desc(receipts.createdAt),
+        ),
+        with: {
+          expenses: {
+            orderBy: desc(expenses.id),
+            where: input.category && eq(expenses.type, input.category),
+          },
+        },
+      });
+
+      return rs.filter((r) => r.expenses.length > 0);
+    }),
   getOne: authenticatedProcedure
     .input(IdSchema)
+    .output(ReceiptOutputSchema)
     .query(async ({ input, ctx }) => {
-      return await ctx.db.query.receipts.findFirst({
+      const cached = await ctx.redis.get(`receipt:${input.id}`);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+
+      const r = await ctx.db.query.receipts.findFirst({
         where: and(
           eq(receipts.createdById, ctx.session.user.id),
           isNull(receipts.deletedAt),
@@ -127,6 +191,7 @@ export const receiptRouter = createTRPCRouter({
           expenses: true,
         },
       });
+      await ctx.redis.set(`receipt:${input.id}`, JSON.stringify(r));
     }),
   save: authenticatedProcedure
     .input(IdSchema)
@@ -143,6 +208,11 @@ export const receiptRouter = createTRPCRouter({
             eq(receipts.id, input.id),
           ),
         );
+      await InvalidateReceipt({
+        receiptId: input.id,
+        redis: ctx.redis,
+        userId: ctx.session.user.id,
+      });
     }),
   delete: authenticatedProcedure
     .input(IdSchema)
@@ -159,5 +229,79 @@ export const receiptRouter = createTRPCRouter({
             eq(receipts.id, input.id),
           ),
         );
+
+      await InvalidateReceipt({
+        receiptId: input.id,
+        redis: ctx.redis,
+        userId: ctx.session.user.id,
+      });
+    }),
+
+  createExpense: authenticatedProcedure
+    .input(ExpenseSchema)
+    .mutation(async ({ ctx, input }) => {
+      const receipt = await ctx.db.query.receipts.findFirst({
+        where: and(
+          eq(receipts.createdById, ctx.session.user.id),
+          isNull(receipts.deletedAt),
+          eq(receipts.id, input.receiptId),
+        ),
+      });
+
+      if (!receipt) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Такого чека не существует",
+        });
+      }
+
+      await ctx.db.insert(expenses).values({
+        ...input,
+        createdById: ctx.session.user.id,
+      });
+      await InvalidateReceipt({
+        receiptId: input.receiptId,
+        redis: ctx.redis,
+        userId: ctx.session.user.id,
+      });
+    }),
+
+  updateExpense: authenticatedProcedure
+    .input(ExpenseSchema.merge(IdSchema))
+    .mutation(async ({ ctx, input }) => {
+      const r = await ctx.db
+        .update(expenses)
+        .set(input)
+        .where(
+          and(
+            eq(expenses.id, input.id),
+            eq(expenses.createdById, ctx.session.user.id),
+          ),
+        )
+        .returning();
+      console.log(r);
+      await InvalidateReceipt({
+        receiptId: input.receiptId,
+        redis: ctx.redis,
+        userId: ctx.session.user.id,
+      });
+    }),
+
+  deleteExpense: authenticatedProcedure
+    .input(IdSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(expenses)
+        .where(
+          and(
+            eq(expenses.id, input.id),
+            eq(expenses.createdById, ctx.session.user.id),
+          ),
+        );
+      await InvalidateReceipt({
+        receiptId: input.receiptId,
+        redis: ctx.redis,
+        userId: ctx.session.user.id,
+      });
     }),
 });

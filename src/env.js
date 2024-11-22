@@ -35,6 +35,8 @@ export const env = createEnv({
     S3_ACCESS_KEY: z.string(),
     S3_SECRET_KEY: z.string(),
 
+    REDIS_URL: z.string().url(),
+
     OPENAI_API_KEY: z.string(),
   },
 
@@ -64,6 +66,8 @@ export const env = createEnv({
     S3_BUCKET: process.env.S3_BUCKET,
     S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
     S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+
+    REDIS_URL: process.env.REDIS_URL,
 
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },

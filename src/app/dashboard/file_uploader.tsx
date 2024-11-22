@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { FileScan } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,7 +19,7 @@ export default function FileUploader() {
   const router = useRouter();
   const analyzeReceiptMutation = api.receipt.analyze.useMutation({
     onSuccess(data) {
-      router.push(`/dashboard/expenses/${data}`);
+      router.push(`/dashboard/expense/new?receiptId=${data}`);
       setOpen(false);
     },
     onError(error) {
@@ -92,16 +92,10 @@ export default function FileUploader() {
           <>
             <div className="absolute inset-0 p-6 z-[200] ">
               <div className="size-full backdrop-blur-sm flex items-center justify-center rounded-xl">
-                <Loader
-                  className="text-white"
-                  size="lg"
-                />
+                <Loader className="text-white" size="lg" />
               </div>
             </div>
-            <img
-              src={image.b64}
-              className="size-full rounded-xl"
-            />
+            <img src={image.b64} className="size-full rounded-xl" />
           </>
         ) : (
           <>

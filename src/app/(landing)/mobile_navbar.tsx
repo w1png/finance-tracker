@@ -13,6 +13,7 @@ import {
 } from "~/components/ui/sheet";
 import { navbarItems } from "./navbarItems";
 import NavbarItem from "./navbarItem";
+import Link from "next/link";
 
 export default function MobileNavbar() {
   const [open, setOpen] = useState(false);
@@ -20,18 +21,13 @@ export default function MobileNavbar() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="aspect-square">
-          <Menu className="text-primary lg:hidden" />
+        <Button variant="ghost" size="icon" className="aspect-square lg:hidden">
+          <Menu className="text-primary" />
         </Button>
       </SheetTrigger>
       <SheetContent className="container p-0 bg-background flex flex-col">
         <SheetHeader className="items-center flex justify-between !h-16 px-4 pb-0">
           <Logo />
-          <SheetClose asChild>
-            <Button variant="ghost" size="icon" className="aspect-square">
-              <X className="text-primary" />
-            </Button>
-          </SheetClose>
         </SheetHeader>
         <ul className="grow p-4 flex flex-col gap-4 shrink items-center">
           {navbarItems.map((item) => (
@@ -41,7 +37,9 @@ export default function MobileNavbar() {
           ))}
         </ul>
         <div className="h-16 items-center justify-center px-4">
-          <Button className="w-full">Вход</Button>
+          <Link href="/auth/signin" className="w-full">
+            <Button className="w-full">Вход</Button>
+          </Link>
         </div>
       </SheetContent>
     </Sheet>
