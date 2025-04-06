@@ -8,6 +8,7 @@ import { db } from "~/server/db";
 import { s3 } from "../s3";
 import { ai } from "../openai";
 import { redis } from "../redis";
+import { yookassa } from "../yookassa";
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await getServerAuthSession();
@@ -18,6 +19,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     redis,
     s3,
     session,
+    yookassa,
     ...opts,
   };
 };

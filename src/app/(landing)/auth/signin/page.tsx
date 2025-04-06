@@ -46,12 +46,17 @@ export default function SignInPage() {
       const res = await signIn(provider, {
         redirect: false,
         ...data,
+        callbackUrl: `${window.location.origin}/dashboard`,
       });
       if (res?.error) {
         throw new Error(res.error);
       }
 
-      router.push("/");
+      if (provider === "email") {
+        toast.success("Ссылка на вход отправлена на Email");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (error) {
       toast.error((error as Error).message);
     }

@@ -12,11 +12,11 @@ import {
 import { TRPCError } from "@trpc/server";
 import Sharp from "sharp";
 import { createCaller } from "..";
-import { expenses, receipts } from "~/server/db/schema";
+import { expenses, receipts, users } from "~/server/db/schema";
 import { and, asc, desc, eq, gte, isNull } from "drizzle-orm";
 import { IdSchema, OrderSchema } from "~/lib/shared/types/utils";
 import { subDays } from "date-fns";
-import { type redis as RedisClient } from "~/server/redis";
+import type { redis as RedisClient } from "~/server/redis";
 
 async function InvalidateReceipt({
   receiptId,
@@ -57,6 +57,13 @@ export const receiptRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      if (ctx.session.user.receiptsLeft <= 0) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "У вас недостаточно прав для создания чеков",
+        });
+      }
+
       const resizedImage = await ResizeImage(input.image);
 
       const imageHash = crypto
@@ -136,6 +143,13 @@ export const receiptRouter = createTRPCRouter({
         userId: ctx.session.user.id,
       });
       await ctx.redis.set(`img:${imageHash}`, receiptId!);
+
+      await ctx.db
+        .update(users)
+        .set({
+          receiptsLeft: ctx.session.user.receiptsLeft - 1,
+        })
+        .where(eq(users.id, ctx.session.user.id));
 
       return receiptId!;
     }),

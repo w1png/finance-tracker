@@ -19,6 +19,8 @@ import {
   users,
   verificationTokens,
 } from "~/server/db/schema";
+import { isBefore } from "date-fns";
+import { Subscription, subscriptions } from "~/lib/shared/types/subscriptions";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -28,14 +30,45 @@ declare module "next-auth" {
 }
 
 const GetDBUser = async (id: string) => {
-  return await db.query.users.findFirst({
+  const user = await db.query.users.findFirst({
     where: eq(users.id, id),
     columns: {
       id: true,
       email: true,
       role: true,
+      currentSubscription: true,
+      subscriptionEndsAt: true,
+      receiptsLeft: true,
     },
   });
+
+  if (!user) return undefined;
+
+  const currentSubscription: Subscription = isBefore(
+    user.subscriptionEndsAt,
+    new Date(),
+  )
+    ? subscriptions[0]
+    : subscriptions.find((s) => s.name === user.currentSubscription)!;
+
+  // if user has more receipts than allowed by their subscription then set the max as currentSubscription.receiptsPerMonth
+  const newReceiptsLeft = Math.min(
+    user.receiptsLeft,
+    currentSubscription.receiptsPerMonth,
+  );
+
+  if (newReceiptsLeft !== user.receiptsLeft) {
+    await db
+      .update(users)
+      .set({ receiptsLeft: newReceiptsLeft })
+      .where(eq(users.id, user.id));
+  }
+
+  return {
+    ...user,
+    currentSubscription,
+    receiptsLeft: newReceiptsLeft,
+  };
 };
 
 export const authOptions: NextAuthOptions = {

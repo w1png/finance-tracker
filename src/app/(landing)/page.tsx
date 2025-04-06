@@ -16,12 +16,15 @@ import FeedbackImage from "~/components/icons/feedback";
 import { Button } from "~/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { subscriptions } from "~/lib/shared/types/subscriptions";
+import { currencyFormatter } from "~/lib/shared/formatter";
 
 export default function LandingClientPage() {
   return (
     <main className="flex flex-col">
       <Hero />
       <Advantages />
+      <Subscriptions />
       <FAQ />
       <Feedback />
     </main>
@@ -205,6 +208,69 @@ function FAQ() {
           </AccordionItem>
         ))}
       </Accordion>
+    </section>
+  );
+}
+
+function Subscriptions() {
+  return (
+    <section
+      className="flex flex-col py-20 gap-16 container items-center justify-center"
+      id="advantages"
+    >
+      <h2 className="text-2xl md:text-4xl lg:text-5xl max-w-[20ch] text-center mx-auto font-extrabold">
+        <span>Выбери удобный план</span>
+        <br />
+        <span className="text-primary">для себя</span>
+      </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {subscriptions.map((subscription) => (
+          <div
+            className={cn(
+              "py-12 px-6 flex flex-col gap-4 rounded-2xl",
+              subscription.name === "basic"
+                ? "bg-primary text-white"
+                : "border bg-white",
+            )}
+            key={subscription.name}
+          >
+            <div className="flex flex-col gap-2">
+              <p className="text-2xl font-bold">{subscription.localizedName}</p>
+              <p
+                className={cn(
+                  subscription.name !== "basic" && "text-muted-foreground",
+                )}
+              >
+                {subscription.description}
+              </p>
+            </div>
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-center gap-1">
+                <span className="font-bold text-5xl">
+                  {currencyFormatter.format(subscription.price)}
+                </span>
+                <span
+                  className={cn(
+                    subscription.name !== "basic" && "text-muted-foreground",
+                  )}
+                >
+                  /месяц
+                </span>
+              </div>
+              <Link href="/auth/signin">
+                <Button
+                  variant={
+                    subscription.name === "basic" ? "secondary" : "outline"
+                  }
+                  className="w-full"
+                >
+                  Начать
+                </Button>
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

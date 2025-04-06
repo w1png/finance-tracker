@@ -11,6 +11,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "next-auth/adapters";
+import { subscriptions } from "~/lib/shared/types/subscriptions";
 
 export const createTable = pgTableCreator((name) => `project_${name}`);
 
@@ -30,6 +31,12 @@ export const files = createTable("files", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const subscriptionEnum = pgEnum("subscription", [
+  "start",
+  "basic",
+  "pro",
+]);
+
 export const users = createTable("user", {
   id: varchar("id", { length: 255 })
     .notNull()
@@ -41,6 +48,17 @@ export const users = createTable("user", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
+  currentSubscription: subscriptionEnum("current_subscription")
+    .default("start")
+    .notNull(),
+  subscriptionEndsAt: timestamp("subscription_ends_at", {
+    withTimezone: true,
+  })
+    .notNull()
+    .defaultNow(),
+  receiptsLeft: integer("receipts_left")
+    .notNull()
+    .default(subscriptions[0].receiptsPerMonth),
   image: varchar("image", { length: 255 }),
   role: userRoleEnum("role").default("USER"),
 });
@@ -181,5 +199,51 @@ export const expensesRelations = relations(expenses, ({ one }) => ({
   receipt: one(receipts, {
     fields: [expenses.receiptId],
     references: [receipts.id],
+  }),
+}));
+
+export const paymentStatuses = [
+  "pending",
+  "waiting_for_capture",
+  "succeeded",
+  "canceled",
+] as const;
+
+export const paymentStatusesEnum = pgEnum("payment_status", paymentStatuses);
+
+export const payments = createTable("payments", {
+  id: varchar("id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+
+  idempotencyKey: varchar("idempotency_key", { length: 255 })
+    .notNull()
+    .unique(),
+  yookassaId: varchar("yookassa_id", { length: 255 }).notNull().unique(),
+  confirmationUrl: varchar("confirmation_url", { length: 255 }).notNull(),
+
+  amount: integer("amount").notNull(),
+  incomeAmount: integer("income_amount"),
+  status: paymentStatusesEnum("status").notNull().default("pending"),
+  paid: boolean("paid").notNull().default(false),
+
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+
+  subscription: subscriptionEnum("subscription").notNull(),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdateFn(() => new Date()),
+});
+
+export const paymentRelations = relations(payments, ({ one }) => ({
+  user: one(users, {
+    fields: [payments.userId],
+    references: [users.id],
   }),
 }));

@@ -19,6 +19,7 @@ import Link from "next/link";
 import { currencyFormatter } from "~/lib/client/utils";
 import { columns } from "../../expenses/[category]/info";
 import { DataTable } from "~/components/ui/data-table";
+import NotAllowedModal from "~/components/not-allowed-modal";
 
 export default function NewExpensePage({
   searchParams,
@@ -28,6 +29,7 @@ export default function NewExpensePage({
   };
 }) {
   const [receiptId, setReceiptId] = useState(searchParams.receiptId);
+  const [notAllowedModalOpen, setNotAllowedModalOpen] = useState(false);
 
   const { data: receipt, isLoading } = api.receipt.getOne.useQuery(
     {
@@ -46,9 +48,13 @@ export default function NewExpensePage({
       router.replace(`/dashboard/expense/new?receiptId=${id}`);
     },
     onError: (error) => {
-      toast.error("Ошибка загрузку фото", {
-        description: error.message,
-      });
+      if (error.data?.code === "FORBIDDEN") {
+        setNotAllowedModalOpen(true);
+      } else {
+        toast.error("Произошла ошибка!", {
+          description: error.message,
+        });
+      }
     },
   });
 
@@ -67,98 +73,105 @@ export default function NewExpensePage({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <Dashboard>
-      <DashboardHeader>
-        <DashboardTitle>Новый чек</DashboardTitle>
-      </DashboardHeader>
-      <DashboardContent>
-        <div className="flex lg:flex-row gap-4 flex-col">
-          <div className="border-primary border-2 rounded-xl overflow-hidden bg-secondary/60 w-full lg:w-52 aspect-[2/2.5]">
-            {receipt ? (
-              <Image
-                src={receipt?.fileId}
-                alt={receipt?.fileId}
-                className="size-full object-cover"
-                width={1000}
-                height={1500}
+    <>
+      <NotAllowedModal
+        open={notAllowedModalOpen}
+        setOpen={setNotAllowedModalOpen}
+      />
+
+      <Dashboard>
+        <DashboardHeader>
+          <DashboardTitle>Новый чек</DashboardTitle>
+        </DashboardHeader>
+        <DashboardContent>
+          <div className="flex lg:flex-row gap-4 flex-col">
+            <div className="border-primary border-2 rounded-xl overflow-hidden bg-secondary/60 w-full lg:w-52 aspect-[2/2.5]">
+              {receipt ? (
+                <Image
+                  src={receipt?.fileId}
+                  alt={receipt?.fileId}
+                  className="size-full object-cover"
+                  width={1000}
+                  height={1500}
+                />
+              ) : (
+                <>
+                  {isLoading || analyzeReceiptMutation.isPending ? (
+                    <div className="flex items-center justify-center size-full">
+                      <Loader />
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </div>
+            <label>
+              <Button
+                className="w-full"
+                onClick={() => inputRef.current?.click()}
+              >
+                <Download />
+                <span>Загрузить чек</span>
+              </Button>
+              <input
+                className="hidden"
+                ref={inputRef}
+                type="file"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  console.log("starting mutation");
+                  analyzeReceiptMutation.mutate({
+                    image: (await ConvertFiles([file]))[0]!,
+                  });
+                }}
               />
+            </label>
+          </div>
+          <div className="">
+            {receipt ? (
+              <>
+                <DataTable columns={columns} data={receipt.expenses} />
+
+                <div className="flex justify-end w-full py-2">
+                  <p className="font-semibold">
+                    Итого:{" "}
+                    {currencyFormatter.format(
+                      receipt.expenses.reduce(
+                        (acc, cur) => acc + cur.quantity * cur.price,
+                        0,
+                      ) / 100,
+                    )}
+                  </p>
+                </div>
+              </>
             ) : (
               <>
-                {isLoading || analyzeReceiptMutation.isPending ? (
-                  <div className="flex items-center justify-center size-full">
+                {isLoading ? (
+                  <div className="w-full h-52 flex justify-center items-center">
                     <Loader />
                   </div>
                 ) : null}
               </>
             )}
           </div>
-          <label>
+          <div className="grid grid-cols-2 gap-4">
+            <Link href="/dashboard">
+              <Button variant="secondary" className="w-full">
+                Отмена
+              </Button>
+            </Link>
             <Button
-              className="w-full"
-              onClick={() => inputRef.current?.click()}
-            >
-              <Download />
-              <span>Загрузить чек</span>
-            </Button>
-            <input
-              className="hidden"
-              ref={inputRef}
-              type="file"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                console.log("starting mutation");
-                analyzeReceiptMutation.mutate({
-                  image: (await ConvertFiles([file]))[0]!,
+              onClick={() => {
+                saveReceiptMutation.mutate({
+                  id: receiptId,
                 });
               }}
-            />
-          </label>
-        </div>
-        <div className="">
-          {receipt ? (
-            <>
-              <DataTable columns={columns} data={receipt.expenses} />
-
-              <div className="flex justify-end w-full py-2">
-                <p className="font-semibold">
-                  Итого:{" "}
-                  {currencyFormatter.format(
-                    receipt.expenses.reduce(
-                      (acc, cur) => acc + cur.quantity * cur.price,
-                      0,
-                    ) / 100,
-                  )}
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              {isLoading ? (
-                <div className="w-full h-52 flex justify-center items-center">
-                  <Loader />
-                </div>
-              ) : null}
-            </>
-          )}
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Link href="/dashboard">
-            <Button variant="secondary" className="w-full">
-              Отмена
+            >
+              Сохранить
             </Button>
-          </Link>
-          <Button
-            onClick={() => {
-              saveReceiptMutation.mutate({
-                id: receiptId,
-              });
-            }}
-          >
-            Сохранить
-          </Button>
-        </div>
-      </DashboardContent>
-    </Dashboard>
+          </div>
+        </DashboardContent>
+      </Dashboard>
+    </>
   );
 }

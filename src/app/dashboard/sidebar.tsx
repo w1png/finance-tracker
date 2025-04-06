@@ -1,6 +1,13 @@
 "use client";
 
-import { ChartPie, Cog, DoorOpen, LayoutGrid, Menu } from "lucide-react";
+import {
+  ChartPie,
+  Cog,
+  DoorOpen,
+  GalleryVerticalEnd,
+  LayoutGrid,
+  Menu,
+} from "lucide-react";
 import Logo from "~/components/ui/logo";
 import {
   Sidebar,
@@ -67,6 +74,18 @@ export default function DashboardSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/dashboard/subscriptions"}
+                >
+                  <Link href="/dashboard/subscriptions">
+                    <GalleryVerticalEnd />
+                    <span>Тарифы</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
               <Collapsible
                 open={categoriesOpen}
                 onOpenChange={setCategoriesOpen}

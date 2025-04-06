@@ -10,3 +10,9 @@ export const IdSchema = z.object({
 });
 
 export const OrderSchema = z.enum(["asc", "desc"]);
+
+export const currencyFormatter = new Intl.NumberFormat("ru-RU", {
+  style: "currency",
+  currency: "RUB",
+  maximumFractionDigits: 0,
+});

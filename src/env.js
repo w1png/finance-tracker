@@ -35,6 +35,9 @@ export const env = createEnv({
     S3_ACCESS_KEY: z.string(),
     S3_SECRET_KEY: z.string(),
 
+    YOOKASSA_SHOP_ID: z.string(),
+    YOOKASSA_SECRET_KEY: z.string(),
+
     REDIS_URL: z.string().url(),
 
     OPENAI_API_KEY: z.string(),
@@ -66,6 +69,9 @@ export const env = createEnv({
     S3_BUCKET: process.env.S3_BUCKET,
     S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
     S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+
+    YOOKASSA_SECRET_KEY: process.env.YOOKASSA_SECRET_KEY,
+    YOOKASSA_SHOP_ID: process.env.YOOKASSA_SHOP_ID,
 
     REDIS_URL: process.env.REDIS_URL,
 
