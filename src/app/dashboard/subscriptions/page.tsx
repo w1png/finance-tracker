@@ -10,6 +10,8 @@ import { subscriptions } from "~/lib/shared/types/subscriptions";
 import PurchaseButton from "./purchase-button";
 import { getServerAuthSession } from "~/server/auth";
 
+export const dynamic = "force-dynamic";
+
 export default async function SubscriptionsPage() {
   const session = (await getServerAuthSession())!;
 

@@ -10,6 +10,8 @@ import DashboardStatsAI from "./ai";
 import { ReactNode } from "react";
 import CategoriesStats from "./categories";
 
+export const dynamic = "force-dynamic";
+
 export default function DashboardStats() {
   return (
     <Dashboard>

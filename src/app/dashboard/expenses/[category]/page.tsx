@@ -13,6 +13,8 @@ import { DataTable } from "~/components/ui/data-table";
 import { columns } from "./columns";
 import Filters from "./filters";
 
+export const dynamic = "force-dynamic";
+
 const searchParamsCache = createSearchParamsCache({
   ...lastDaysParser,
   ...createdAtParser,

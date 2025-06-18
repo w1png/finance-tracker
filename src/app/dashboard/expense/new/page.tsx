@@ -21,6 +21,8 @@ import { columns } from "../../expenses/[category]/info";
 import { DataTable } from "~/components/ui/data-table";
 import NotAllowedModal from "~/components/not-allowed-modal";
 
+export const dynamic = "force-dynamic";
+
 export default function NewExpensePage({
   searchParams,
 }: {

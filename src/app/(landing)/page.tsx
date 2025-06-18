@@ -1,5 +1,5 @@
 import { HeartHandshake, Hourglass } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import AdvantagesImage from "~/components/icons/advantages";
 import HeroDashboard from "../../../public/hero_dashboard.svg";
 import Pig from "../../../public/pig.svg";
