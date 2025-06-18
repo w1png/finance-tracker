@@ -77,6 +77,6 @@ export const env = createEnv({
 
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  skipValidation: true,
   emptyStringAsUndefined: true,
 });

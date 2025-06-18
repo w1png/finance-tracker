@@ -20,7 +20,10 @@ import {
   verificationTokens,
 } from "~/server/db/schema";
 import { isBefore } from "date-fns";
-import { Subscription, subscriptions } from "~/lib/shared/types/subscriptions";
+import {
+  type Subscription,
+  subscriptions,
+} from "~/lib/shared/types/subscriptions";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {

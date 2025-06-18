@@ -57,7 +57,10 @@ export const receiptRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      if (ctx.session.user.receiptsLeft <= 0) {
+      if (
+        ctx.session.user.currentSubscription.name !== "pro" &&
+        ctx.session.user.receiptsLeft <= 0
+      ) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "У вас недостаточно прав для создания чеков",
@@ -76,6 +79,7 @@ export const receiptRouter = createTRPCRouter({
         return cachedReceiptId;
       }
 
+      console.log("receipt not cached");
       const result = await ctx.ai.chat.completions.create({
         model: "gpt-4o-2024-08-06",
         response_format: zodResponseFormat(ReceiptSchema, "receipt"),
@@ -97,6 +101,7 @@ export const receiptRouter = createTRPCRouter({
           },
         ],
       });
+      console.log({ result });
 
       const content = result.choices[0]?.message.content;
       if (!content)
@@ -313,7 +318,7 @@ export const receiptRouter = createTRPCRouter({
           ),
         );
       await InvalidateReceipt({
-        receiptId: input.receiptId,
+        receiptId: input.id,
         redis: ctx.redis,
         userId: ctx.session.user.id,
       });
