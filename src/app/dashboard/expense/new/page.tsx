@@ -47,7 +47,8 @@ export default function NewExpensePage({
   const analyzeReceiptMutation = api.receipt.analyze.useMutation({
     onSuccess: (id) => {
       setReceiptId(id);
-      router.replace(`/dashboard/expense/new?receiptId=${id}`);
+      router.push("/dashboard/expense/new?receiptId=${id}");
+      toast.success("Чек загружен");
     },
     onError: (error) => {
       if (error.data?.code === "FORBIDDEN") {
